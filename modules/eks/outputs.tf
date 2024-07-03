@@ -11,14 +11,13 @@ output "eks_cluster_certificate_authority_data" {
 }
 
 output "eks_node_role_arn" {
-  value = aws_iam_role.this.arn
+  value = aws_iam_role.eks_cluster_role.arn
 }
 
 output "eks_security_group_id" {
   value = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
 }
 
-// Rename or remove the duplicate output
 output "eks_load_balancer_controller_role_arn" {
   value = aws_iam_role.load_balancer_controller_role.arn
 }
