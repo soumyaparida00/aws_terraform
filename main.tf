@@ -1,17 +1,15 @@
 terraform {
- required_providers {
-   aws = {
-     source  = "hashicorp/aws"
-     version = "~> 3.64.0"
-   }
- }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.64.0"
+    }
+  }
 
-backend "s3" {
-    # Replace this with your bucket name!
+  backend "s3" {
     bucket         = "vtb-aws-tf-backend"
     key            = "terraform/terraform.tfstate"
     region         = "ap-south-1"
-    # Replace this with your DynamoDB table name!
     dynamodb_table = "terraform-state-lock"
     encrypt        = true
   }
@@ -21,11 +19,21 @@ provider "aws" {
   region = var.region
 }
 
+# Define the AWS VPC
+resource "aws_vpc" "main" {
+  cidr_block       = var.vpc_cidr
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = "Main VPC"
+  }
+}
+
 # VPC Module
 module "vpc" {
   source = "./modules/vpc"
 
-  vpc_cidr             = "10.6.0.0/16"
+  vpc_cidr             = var.vpc_cidr
   private_subnet_cidrs = var.private_subnet_cidrs
   public_subnet_cidrs  = var.public_subnet_cidrs
   availability_zones   = var.availability_zones
@@ -35,7 +43,7 @@ module "vpc" {
 module "eks" {
   source = "./modules/eks"
 
-  vpc_id = aws_vpc.main.id
+  vpc_id            = aws_vpc.main.id  # Reference the VPC ID here
   cluster_name      = "my-eks-cluster"
   cluster_role_arn  = var.cluster_role_arn
   subnet_ids        = var.subnet_ids
@@ -48,7 +56,6 @@ module "eks" {
   tags              = var.tags
   load_balancer_controller_policy_json = var.load_balancer_controller_policy_json
 }
-
 
 # ALB Module
 module "alb" {
