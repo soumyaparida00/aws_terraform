@@ -3,7 +3,7 @@ variable "vpc_id" {
 }
 
 variable "subnet_ids" {
-  description = "The subnet IDs where the EKS cluster will be deployed"
+  description = "A list of subnet IDs where the EKS cluster and node groups will be deployed"
   type        = list(string)
 }
 
