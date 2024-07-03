@@ -36,7 +36,7 @@ module "eks" {
   vpc_id                    = module.vpc.vpc_id_output
   cluster_name              = "my-eks-cluster"
   cluster_role_arn          = var.cluster_role_arn
-  subnet_ids                = var.subnet_ids
+  subnet_ids                = module.vpc.public_subnet_ids
   key_name                  = var.key_name
   node_role_arn             = var.node_role_arn
   instance_types            = var.instance_types
