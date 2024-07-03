@@ -3,9 +3,9 @@ resource "aws_eks_cluster" "this" {
   role_arn = var.cluster_role_arn
 
   vpc_config {
-    subnet_ids         = var.subnet_ids
-    endpoint_private_access = true
-    endpoint_public_access  = true
+    subnet_ids                = var.subnet_ids
+    endpoint_private_access   = true
+    endpoint_public_access    = true
   }
 
   kubernetes_network_config {
@@ -14,7 +14,12 @@ resource "aws_eks_cluster" "this" {
 
   tags = var.tags
 
-  depends_on = [aws_iam_role_policy_attachment.cluster_policy]
+  depends_on = [
+    aws_iam_role_policy_attachment.cluster_policy,
+    aws_iam_role_policy_attachment.service_policy,
+    aws_iam_role_policy_attachment.node_policy,
+    aws_iam_role_policy_attachment.cni_policy
+  ]
 }
 
 resource "aws_eks_node_group" "this" {
@@ -33,7 +38,7 @@ resource "aws_eks_node_group" "this" {
     ec2_ssh_key = var.key_name
   }
 
-  ami_type  = "AL2_x86_64"
+  ami_type       = "AL2_x86_64"
   instance_types = var.instance_types
 
   tags = merge(var.tags, { "Name" = "${var.cluster_name}-node-group" })
@@ -41,24 +46,44 @@ resource "aws_eks_node_group" "this" {
   depends_on = [aws_eks_cluster.this]
 }
 
+# IAM Role for EKS Cluster
+resource "aws_iam_role" "eks_cluster_role" {
+  name               = "EKS-Cluster-Role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = {
+          Service = "eks.amazonaws.com"
+        }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# IAM Role Policy Attachments
 resource "aws_iam_role_policy_attachment" "cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.this.name
+  role       = aws_iam_role.eks_cluster_role.name
 }
 
 resource "aws_iam_role_policy_attachment" "service_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.this.name
+  role       = aws_iam_role.eks_cluster_role.name
 }
 
 resource "aws_iam_role_policy_attachment" "node_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.this.name
+  role       = aws_iam_role.eks_cluster_role.name
 }
 
 resource "aws_iam_role_policy_attachment" "cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.this.name
+  role       = aws_iam_role.eks_cluster_role.name
 }
 
 # Load Balancer Controller IAM Role
@@ -104,7 +129,7 @@ resource "kubernetes_config_map" "aws_auth" {
   data = {
     mapRoles = jsonencode([
       {
-        rolearn  = aws_iam_role.node_role.arn
+        rolearn  = var.node_role_arn
         username = "system:node:{{EC2PrivateDNSName}}"
         groups   = ["system:bootstrappers", "system:nodes"]
       },
@@ -130,7 +155,7 @@ output "cluster_certificate_authority_data" {
 }
 
 output "node_role_arn" {
-  value = aws_iam_role.this.arn
+  value = aws_iam_role.eks_cluster_role.arn
 }
 
 output "security_group_id" {
