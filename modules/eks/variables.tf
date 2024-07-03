@@ -60,5 +60,46 @@ variable "tags" {
 variable "load_balancer_controller_policy_json" {
   description = "The JSON policy document for the AWS Load Balancer Controller IAM policy."
   type        = string
-  default     = file("./aws-load-balancer-controller-policy.json")
+  default     = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "acm:DescribeCertificate",
+        "acm:ListCertificates",
+        "acm:GetCertificate",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:CreateSecurityGroup",
+        "ec2:CreateTags",
+        "ec2:DeleteTags",
+        "ec2:DeleteSecurityGroup",
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeTags",
+        "ec2:DescribeVpcs",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:ModifyNetworkInterfaceAttribute",
+        "ec2:RevokeSecurityGroupIngress",
+        "elasticloadbalancing:AddListenerCertificates",
+        "elasticloadbalancing:AddTags",
+        "elasticloadbalancing:CreateListener",
+        "elasticloadbalancing:CreateLoadBalancer",
+        "elasticloadbalancing:CreateRule",
+        "elasticloadbalancing:CreateTargetGroup",
+        "elasticloadbalancing:DeleteListener",
+        "elasticloadbalancing:DeleteLoadBalancer",
+        "elasticloadbalancing:DeleteRule",
+        "elasticloadbalancing:DeleteTargetGroup",
+        "elasticloadbalancing:DescribeListeners",
+        "elasticloadbalancing:DescribeLoadBalancers"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
 }

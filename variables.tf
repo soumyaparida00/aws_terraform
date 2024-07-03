@@ -51,3 +51,97 @@ variable "environment" {
   description = "The environment for which the resources are created"
   default     = "dev"
 }
+variable "cluster_role_arn" {
+  description = "The ARN of the IAM role that provides permissions for the EKS cluster."
+  type        = string
+  default = "arn:aws:iam::851725524405:role/eksClusterRole"
+}
+variable "subnet_ids" {
+  description = "A list of subnet IDs where the EKS cluster and node groups will be deployed."
+  type        = list(string)
+  default     = []
+}
+
+locals {
+  private_subnet_ids = aws_subnet.private[*].id
+  public_subnet_ids  = aws_subnet.public[*].id
+
+  all_subnets = concat(local.private_subnet_ids, local.public_subnet_ids)
+}
+
+variable "instance_types" {
+  description = "List of EC2 instance types for the EKS node group."
+  type        = list(string)
+  default     = ["t3.medium"]
+}
+
+variable "node_desired_size" {
+  description = "Desired number of nodes in the EKS node group."
+  type        = number
+  default     = 2
+}
+
+variable "node_max_size" {
+  description = "Maximum number of nodes in the EKS node group."
+  type        = number
+  default     = 3
+}
+
+variable "node_min_size" {
+  description = "Minimum number of nodes in the EKS node group."
+  type        = number
+  default     = 1
+}
+
+variable "tags" {
+  description = "A map of tags to add to all resources."
+  type        = map(string)
+  default     = {}
+}
+
+variable "load_balancer_controller_policy_json" {
+  description = "The JSON policy document for the AWS Load Balancer Controller IAM policy."
+  type        = string
+  default     = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "acm:DescribeCertificate",
+        "acm:ListCertificates",
+        "acm:GetCertificate",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:CreateSecurityGroup",
+        "ec2:CreateTags",
+        "ec2:DeleteTags",
+        "ec2:DeleteSecurityGroup",
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceStatus",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeTags",
+        "ec2:DescribeVpcs",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:ModifyNetworkInterfaceAttribute",
+        "ec2:RevokeSecurityGroupIngress",
+        "elasticloadbalancing:AddListenerCertificates",
+        "elasticloadbalancing:AddTags",
+        "elasticloadbalancing:CreateListener",
+        "elasticloadbalancing:CreateLoadBalancer",
+        "elasticloadbalancing:CreateRule",
+        "elasticloadbalancing:CreateTargetGroup",
+        "elasticloadbalancing:DeleteListener",
+        "elasticloadbalancing:DeleteLoadBalancer",
+        "elasticloadbalancing:DeleteRule",
+        "elasticloadbalancing:DeleteTargetGroup",
+        "elasticloadbalancing:DescribeListeners",
+        "elasticloadbalancing:DescribeLoadBalancers"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}

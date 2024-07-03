@@ -33,12 +33,22 @@ module "vpc" {
 
 # EKS Module
 module "eks" {
-  source       = "./modules/eks"
-  vpc_id       = module.vpc.vpc_id_output
-  subnet_ids   = module.vpc.private_subnet_ids
-  key_name     = var.key_name
-  node_role_arn = var.node_role_arn
+  source = "./modules/eks"
+
+  vpc_id = aws_vpc.main.id
+  cluster_name      = "my-eks-cluster"
+  cluster_role_arn  = var.cluster_role_arn
+  subnet_ids        = var.subnet_ids
+  key_name          = var.key_name
+  node_role_arn     = var.node_role_arn
+  instance_types    = var.instance_types
+  node_desired_size = var.node_desired_size
+  node_max_size     = var.node_max_size
+  node_min_size     = var.node_min_size
+  tags              = var.tags
+  load_balancer_controller_policy_json = var.load_balancer_controller_policy_json
 }
+
 
 # ALB Module
 module "alb" {
