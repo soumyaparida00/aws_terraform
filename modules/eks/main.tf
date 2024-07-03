@@ -66,7 +66,7 @@ resource "aws_iam_policy" "load_balancer_controller_policy" {
   name        = "AWSLoadBalancerControllerIAMPolicy"
   path        = "/"
   description = "IAM policy for the AWS Load Balancer Controller"
-  policy      = file("path/to/aws-load-balancer-controller-policy.json")
+  policy      = var.load_balancer_controller_policy_json
 }
 
 resource "aws_iam_role" "load_balancer_controller_role" {
