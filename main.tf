@@ -40,6 +40,15 @@ module "eks" {
   node_role_arn = var.node_role_arn
 }
 
+# ALB Module
+module "alb" {
+  source             = "./modules/alb"
+  vpc_id             = module.vpc.vpc_id_output
+  subnets            = module.vpc.public_subnet_ids
+  security_group_ids = [module.eks.cluster_security_group_id]
+  name               = "my-app-alb"
+}
+
 # S3 and CloudFront Module
 module "s3-cloudfront" {
   source      = "./modules/s3-cloudfront"
@@ -86,4 +95,8 @@ output "private_subnet_ids" {
 
 output "public_subnet_ids" {
   value = module.vpc.public_subnet_ids
+}
+
+output "alb_dns_name" {
+  value = module.alb.alb_dns_name
 }

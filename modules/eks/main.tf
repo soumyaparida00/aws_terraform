@@ -1,36 +1,142 @@
-module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "18.0.1"
-  cluster_name    = "my-eks-cluster"
-  cluster_version = "1.22"
-  vpc_id          = var.vpc_id
-  subnet_ids      = var.subnet_ids
+resource "aws_eks_cluster" "this" {
+  name     = var.cluster_name
+  role_arn = var.cluster_role_arn
 
-  tags = {
-    Name = "my-eks-cluster"
+  vpc_config {
+    subnet_ids         = var.subnet_ids
+    endpoint_private_access = true
+    endpoint_public_access  = true
   }
+
+  kubernetes_network_config {
+    service_ipv4_cidr = "10.100.0.0/16"
+  }
+
+  tags = var.tags
+
+  depends_on = [aws_iam_role_policy_attachment.cluster_policy]
 }
 
-resource "aws_eks_node_group" "spot_nodes" {
-  cluster_name    = module.eks.cluster_id
-  node_group_name = "spot-nodes"
+resource "aws_eks_node_group" "this" {
+  cluster_name    = aws_eks_cluster.this.name
+  node_group_name = "${var.cluster_name}-node-group"
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.subnet_ids
 
   scaling_config {
-    desired_size = 2
-    max_size     = 3
-    min_size     = 1
+    desired_size = var.node_desired_size
+    max_size     = var.node_max_size
+    min_size     = var.node_min_size
   }
-
-  capacity_type = "SPOT"
-  instance_types = ["t3.medium"]
 
   remote_access {
     ec2_ssh_key = var.key_name
   }
 
-  tags = {
-    Name = "spot-nodes"
+  ami_type  = "AL2_x86_64"
+  instance_types = var.instance_types
+
+  tags = merge(var.tags, { "Name" = "${var.cluster_name}-node-group" })
+
+  depends_on = [aws_eks_cluster.this]
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.this.name
+}
+
+resource "aws_iam_role_policy_attachment" "service_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+  role       = aws_iam_role.this.name
+}
+
+resource "aws_iam_role_policy_attachment" "node_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.this.name
+}
+
+resource "aws_iam_role_policy_attachment" "cni_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.this.name
+}
+
+# Load Balancer Controller IAM Role
+resource "aws_iam_policy" "load_balancer_controller_policy" {
+  name        = "AWSLoadBalancerControllerIAMPolicy"
+  path        = "/"
+  description = "IAM policy for the AWS Load Balancer Controller"
+  policy      = file("path/to/aws-load-balancer-controller-policy.json")
+}
+
+resource "aws_iam_role" "load_balancer_controller_role" {
+  name               = "AWSLoadBalancerControllerRole"
+  assume_role_policy = data.aws_iam_policy_document.load_balancer_assume_role_policy.json
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "load_balancer_controller_attach" {
+  policy_arn = aws_iam_policy.load_balancer_controller_policy.arn
+  role       = aws_iam_role.load_balancer_controller_role.name
+}
+
+data "aws_iam_policy_document" "load_balancer_assume_role_policy" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["eks.amazonaws.com", "eks-fargate-pods.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
   }
+}
+
+# Kubernetes ConfigMap for EKS Auth
+resource "kubernetes_config_map" "aws_auth" {
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
+
+  data = {
+    mapRoles = jsonencode([
+      {
+        rolearn  = aws_iam_role.node_role.arn
+        username = "system:node:{{EC2PrivateDNSName}}"
+        groups   = ["system:bootstrappers", "system:nodes"]
+      },
+      {
+        rolearn  = aws_iam_role.load_balancer_controller_role.arn
+        username = "aws-load-balancer-controller"
+        groups   = ["system:masters"]
+      }
+    ])
+  }
+}
+
+output "cluster_id" {
+  value = aws_eks_cluster.this.id
+}
+
+output "cluster_endpoint" {
+  value = aws_eks_cluster.this.endpoint
+}
+
+output "cluster_certificate_authority_data" {
+  value = aws_eks_cluster.this.certificate_authority[0].data
+}
+
+output "node_role_arn" {
+  value = aws_iam_role.this.arn
+}
+
+output "security_group_id" {
+  value = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+}
+
+output "load_balancer_controller_role_arn" {
+  value = aws_iam_role.load_balancer_controller_role.arn
 }
