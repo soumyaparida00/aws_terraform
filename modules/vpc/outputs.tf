@@ -7,5 +7,5 @@ output "private_subnet_ids" {
 }
 
 output "vpc_id_output" {
-  value = aws_vpc.this.id
+  value = aws_vpc.main.id
 }
