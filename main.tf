@@ -57,11 +57,11 @@ module "alb" {
 }
 
 # S3 and CloudFront Module
-#module "s3-cloudfront" {
-#  source      = "./modules/s3-cloudfront"
-#  bucket_name = var.bucket_name
-#  aliases     = var.aliases
-#}
+module "s3-cloudfront" {
+  source      = "./modules/s3-cloudfront"
+  bucket_name = var.bucket_name
+  aliases     = var.aliases
+}
 
 # DynamoDB State Lock Module
 module "dynamodb" {
