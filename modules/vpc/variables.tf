@@ -13,6 +13,13 @@ variable "public_subnet_cidrs" {
   type        = list(string)
 }
 
+variable "cluster_name" {
+  description = "The name of the EKS cluster."
+  type        = string
+  default     = "my-eks-cluster"  # Provide a default value or change as needed
+}
+
+
 variable "availability_zones" {
   description = "A list of availability zones for the subnets"
   type        = list(string)
