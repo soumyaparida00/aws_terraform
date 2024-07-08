@@ -1,3 +1,32 @@
+resource "aws_iam_role_policy_attachment" "node_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.eks_cluster_role.name
+}
+
+resource "aws_iam_policy" "eks_worker_node_policy" {
+  name        = "EKSWorkerNodePolicyWithDescribeNetworkInterfaces"
+  description = "Policy for EKS worker nodes with DescribeNetworkInterfaces permission"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow",
+        Action    = [
+          "ec2:DescribeNetworkInterfaces",
+          # Add other necessary actions here
+        ],
+        Resource  = "*",
+      },
+      # Add other statements as needed
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "node_policy_with_describe_network_interfaces" {
+  policy_arn = aws_iam_policy.eks_worker_node_policy.arn
+  role       = aws_iam_role.eks_cluster_role.name
+}
+
 resource "aws_eks_cluster" "this" {
   name     = var.cluster_name
   role_arn = var.cluster_role_arn

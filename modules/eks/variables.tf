@@ -19,7 +19,7 @@ variable "node_role_arn" {
 variable "cluster_name" {
   description = "The name of the EKS cluster."
   type        = string
-  default     = "cloud-cost-hero"
+  default     = "my-eks-cluster"
 }
 
 variable "cluster_role_arn" {
