@@ -40,8 +40,15 @@ resource "aws_eks_node_group" "this" {
 
   ami_type       = "AL2_x86_64"
   instance_types = var.instance_types
+  capacity_type  = "SPOT"
 
-  tags = merge(var.tags, { "Name" = "${var.cluster_name}-node-group" })
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "${var.cluster_name}-node-group",
+      "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    }
+  )
 
   depends_on = [aws_eks_cluster.this]
 }
