@@ -27,6 +27,25 @@ variable "cluster_role_arn" {
   type        = string
 }
 
+# Add versions for the addons
+variable "vpc_cni_version" {
+  description = "The version of the VPC CNI addon."
+  type        = string
+  default     = "v1.12.1-eksbuild.1"
+}
+
+variable "kube_proxy_version" {
+  description = "The version of the kube-proxy addon."
+  type        = string
+  default     = "v1.24.1-eksbuild.1"
+}
+
+variable "coredns_version" {
+  description = "The version of the CoreDNS addon."
+  type        = string
+  default     = "v1.8.7-eksbuild.1"
+}
+
 variable "instance_types" {
   description = "List of EC2 instance types for the EKS node group."
   type        = list(string)
