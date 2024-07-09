@@ -26,13 +26,13 @@ resource "aws_db_subnet_group" "this" {
 }
 
 output "rds_endpoint" {
-  value = aws_db_instance.this.endpoint
+  value = module.rds.rds_endpoint
 }
 
 output "rds_port" {
-  value = aws_db_instance.this.port
+  value = module.rds.rds_port
 }
 
 output "rds_instance_id" {
-  value = aws_db_instance.this.id
+  value = module.rds.rds_instance_id
 }
