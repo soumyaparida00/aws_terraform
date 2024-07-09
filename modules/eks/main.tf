@@ -152,29 +152,6 @@ data "aws_iam_policy_document" "load_balancer_assume_role_policy" {
   }
 }
 
-# Kubernetes ConfigMap for EKS Auth
-resource "kubernetes_config_map" "aws_auth" {
-  metadata {
-    name      = "aws-auth"
-    namespace = "kube-system"
-  }
-
-  data = {
-    mapRoles = jsonencode([
-      {
-        rolearn  = var.node_role_arn
-        username = "system:node:{{EC2PrivateDNSName}}"
-        groups   = ["system:bootstrappers", "system:nodes"]
-      },
-      {
-        rolearn  = aws_iam_role.load_balancer_controller_role.arn
-        username = "aws-load-balancer-controller"
-        groups   = ["system:masters"]
-      }
-    ])
-  }
-}
-
 output "cluster_id" {
   value = aws_eks_cluster.this.id
 }

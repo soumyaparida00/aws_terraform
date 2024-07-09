@@ -39,7 +39,7 @@ variable "node_role_arn" {
 # S3 Bucket for Application
 variable "bucket_name" {
   description = "The name of the S3 bucket"
-  default     = "react-app-bucket"
+  default     = "reactappbucket-10"
 }
 
 # CloudFront Distribution Aliases

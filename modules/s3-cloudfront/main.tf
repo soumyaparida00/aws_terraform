@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "react_app_bucket_10" {
+resource "aws_s3_bucket" "reactappbucket-10" {
   bucket = var.bucket_name
 
   website {
@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "react_app_bucket_10" {
 }
 
 resource "aws_s3_bucket_policy" "react_app_policy" {
-  bucket = aws_s3_bucket.react_app_bucket_10.id
+  bucket = aws_s3_bucket.reactappbucket-10.id
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -24,7 +24,7 @@ resource "aws_s3_bucket_policy" "react_app_policy" {
           AWS = "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${aws_cloudfront_origin_access_identity.react_app_oai.cloudfront_access_identity_path}"
         },
         Action    = "s3:GetObject",
-        Resource  = "${aws_s3_bucket.react_app_bucket_10.arn}/*"
+        Resource  = "${aws_s3_bucket.reactappbucket-10.arn}/*"
       }
     ]
   })
@@ -36,8 +36,8 @@ resource "aws_cloudfront_origin_access_identity" "react_app_oai" {
 
 resource "aws_cloudfront_distribution" "react_app_distribution" {
   origin {
-    domain_name = aws_s3_bucket.react_app_bucket_10.bucket_regional_domain_name
-    origin_id   = aws_s3_bucket.react_app_bucket_10.id
+    domain_name = aws_s3_bucket.reactappbucket-10.bucket_regional_domain_name
+    origin_id   = aws_s3_bucket.reactappbucket-10.id
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.react_app_oai.cloudfront_access_identity_path
@@ -54,7 +54,7 @@ resource "aws_cloudfront_distribution" "react_app_distribution" {
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = aws_s3_bucket.react_app_bucket_10.id
+    target_origin_id = aws_s3_bucket.reactappbucket-10.id
 
     forwarded_values {
       query_string = false

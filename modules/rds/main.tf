@@ -1,3 +1,9 @@
+resource "aws_db_subnet_group" "this" {
+  name       = "${var.db_name}-subnet-group"
+  subnet_ids = var.subnet_ids
+  tags       = var.tags
+}
+
 resource "aws_db_instance" "this" {
   allocated_storage       = var.allocated_storage
   engine                  = "postgres"
