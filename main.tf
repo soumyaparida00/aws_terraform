@@ -79,7 +79,7 @@ module "rds" {
   db_name                 = "nodeapp"
   username                = "adminuser"
   password                = "7Ew4X89d2Pg"
-  parameter_group_name    = "custom.postgres15"
+  parameter_group_name    = "postgres15"
   publicly_accessible     = false
   vpc_security_group_ids  = [aws_security_group.rds.id]
   subnet_ids              = concat(module.vpc.public_subnet_ids, module.vpc.private_subnet_ids) 
