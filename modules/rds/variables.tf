@@ -37,7 +37,7 @@ variable "password" {
 variable "parameter_group_name" {
   description = "The name of the DB parameter group to associate"
   type        = string
-  default     = "default.postgres12"
+  default     = "custom.postgres15"
 }
 
 variable "publicly_accessible" {
