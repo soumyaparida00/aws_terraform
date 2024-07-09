@@ -7,7 +7,7 @@ variable "allocated_storage" {
 variable "engine_version" {
   description = "The database engine version"
   type        = string
-  default     = "12.4"
+  default     = "15.4"
 }
 
 variable "instance_class" {

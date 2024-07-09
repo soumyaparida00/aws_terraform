@@ -22,7 +22,7 @@ resource "aws_eks_cluster" "this" {
   ]
 }
 resource "aws_eks_addon" "vpc_cni" {
-  cluster_name   = aws_eks_cluster.this.name
+  cluster_name   = my-eks-cluster
   addon_name     = "vpc-cni"
   addon_version  = "v1.18.1-eksbuild.3"
   resolve_conflicts = "OVERWRITE"
@@ -31,7 +31,7 @@ resource "aws_eks_addon" "vpc_cni" {
 }
 
 resource "aws_eks_addon" "kube_proxy" {
-  cluster_name   = aws_eks_cluster.this.name
+  cluster_name   = my-eks-cluster
   addon_name     = "kube-proxy"
   addon_version  = "v1.30.0-eksbuild.3"
   resolve_conflicts = "OVERWRITE"
@@ -40,17 +40,17 @@ resource "aws_eks_addon" "kube_proxy" {
 }
 
 resource "aws_eks_addon" "coredns" {
-  cluster_name   = aws_eks_cluster.this.name
+  cluster_name   = my-eks-cluster
   addon_name     = "coredns"
   addon_version  = "v1.11.1-eksbuild.8"
   resolve_conflicts = "OVERWRITE"
 
-  depends_on = [aws_eks_cluster.this]
+  depends_on = [my-eks-cluster]
 }
 
 resource "aws_eks_node_group" "this" {
-  cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${var.cluster_name}-node-group"
+  cluster_name    = my-eks-cluster
+  node_group_name = "my-eks-cluster-node-group"
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.subnet_ids
 

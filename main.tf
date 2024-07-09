@@ -74,7 +74,7 @@ module "rds" {
   source = "./modules/rds"
 
   allocated_storage       = 20
-  engine_version          = "12.4"
+  engine_version          = "15.4"
   instance_class          = "db.t3.micro"
   db_name                 = "node-app"
   username                = "admin"
