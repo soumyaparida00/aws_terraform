@@ -70,6 +70,56 @@ module "dynamodb" {
   environment = var.environment
 }
 
+module "rds" {
+  source = "./modules/rds"
+
+  allocated_storage       = 20
+  engine_version          = "12.4"
+  instance_class          = "db.t3.micro"
+  db_name                 = "node-app"
+  username                = "admin"
+  password                = "7Ew4X89d2Pg"
+  parameter_group_name    = "default.postgres12"
+  publicly_accessible     = false
+  vpc_security_group_ids  = [aws_security_group.rds.id]
+  subnet_ids              = [aws_subnet.public_subnet.id, aws_subnet.private_subnet.id]
+  skip_final_snapshot     = true
+  final_snapshot_identifier = "final-snapshot"
+  tags                    = {
+    Name = "node-app"
+  }
+}
+
+resource "aws_security_group" "rds" {
+  name        = "rds-sg"
+  description = "Security group for RDS"
+  vpc_id      = module.vpc.vpc_id_output
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = var.tags
+}
+
+output "rds_endpoint" {
+  value = module.rds.rds_endpoint
+}
+
+output "rds_port" {
+  value = module.rds.rds_port
+}
+
 # AWS Key Pair Resource
 resource "aws_key_pair" "id_rsa" {
   key_name   = "id_rsa"

@@ -16,7 +16,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   tf_code_check:
-    name: Terraform Validation and Build
+    name: plan
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +32,48 @@ jobs:
     - name: Setup Terraform CLI
       uses: hashicorp/setup-terraform@v2.0.2
 
-    - name: Terraform init, plan and apply
+    - name: Terraform init, plan
+      env:
+        AWS_KEY_PAIR_PUBLIC_KEY: ${{ secrets.AWS_KEY_PAIR_PUBLIC_KEY }}
+      run: |
+        echo `pwd`
+        echo "tfpath ${{ github.event.inputs.tfpath }}"
+        echo "** Running Terraform Init**"
+        echo "$AWS_KEY_PAIR_PUBLIC_KEY" > id_rsa.pub
+        terraform init
+
+        echo "** Running Terraform Validate**"
+        terraform validate
+
+        echo "** Running Terraform Plan**"
+        terraform plan -lock=false
+      working-directory: ${{ github.event.inputs.tfpath }}
+    - name: Terraform Destroy
+      run: |
+        echo "** Running Terraform Destroy**"
+        terraform plan -destroy
+        terraform destroy -auto-approve
+      working-directory: ${{ github.event.inputs.tfpath }}
+
+  tf_code_deploy:
+    name: apply
+    needs: tf_code_check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2.5.0
+
+
+    - name: Configure AWS Credentials Action For GitHub Actions
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1 
+    - name: Setup Terraform CLI
+      uses: hashicorp/setup-terraform@v2.0.2
+
+    - name: Terraform init, plan
       env:
         AWS_KEY_PAIR_PUBLIC_KEY: ${{ secrets.AWS_KEY_PAIR_PUBLIC_KEY }}
       run: |
