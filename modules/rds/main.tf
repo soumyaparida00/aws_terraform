@@ -24,15 +24,3 @@ resource "aws_db_subnet_group" "this" {
     Name = "RDS Subnet Group"
   }
 }
-
-output "rds_endpoint" {
-  value = module.rds.rds_endpoint
-}
-
-output "rds_port" {
-  value = module.rds.rds_port
-}
-
-output "rds_instance_id" {
-  value = module.rds.rds_instance_id
-}

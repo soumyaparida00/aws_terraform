@@ -120,6 +120,10 @@ output "rds_port" {
   value = module.rds.rds_port
 }
 
+output "rds_instance_id" {
+  value = module.rds.rds_instance_id
+}
+
 # AWS Key Pair Resource
 resource "aws_key_pair" "id_rsa" {
   key_name   = "id_rsa"
