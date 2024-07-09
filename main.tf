@@ -82,7 +82,7 @@ module "rds" {
   parameter_group_name    = "default.postgres12"
   publicly_accessible     = false
   vpc_security_group_ids  = [aws_security_group.rds.id]
-  subnet_ids              = [module.vpc.public_subnet_ids, module.vpc.private_subnet_ids]
+  subnet_ids              = concat(module.vpc.public_subnet_ids, module.vpc.private_subnet_ids) 
   skip_final_snapshot     = true
   final_snapshot_identifier = "final-snapshot"
   tags                    = {
