@@ -76,7 +76,7 @@ module "rds" {
   allocated_storage       = 20
   engine_version          = "15.4"
   instance_class          = "db.t3.micro"
-  db_name                 = "node-app"
+  db_name                 = "nodeapp"
   username                = "admin"
   password                = "7Ew4X89d2Pg"
   parameter_group_name    = "default.postgres12"

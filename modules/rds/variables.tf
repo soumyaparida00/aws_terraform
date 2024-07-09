@@ -19,7 +19,7 @@ variable "instance_class" {
 variable "db_name" {
   description = "The name of the database"
   type        = string
-  default     = "node-app"
+  default     = "nodeapp"
 }
 
 variable "username" {
