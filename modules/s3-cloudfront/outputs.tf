@@ -1,5 +1,5 @@
 output "bucket_name" {
-  value = aws_s3_bucket.react_app_bucket.bucket
+  value = aws_s3_bucket.react_app_bucket_10.bucket
 }
 
 output "cloudfront_distribution_id" {
