@@ -1,9 +1,11 @@
 resource "aws_db_subnet_group" "this" {
-  name       = "${var.db_name}-subnet-group"
+  name       = "node-app-subnet-group"
   subnet_ids = var.subnet_ids
-  tags       = var.tags
-}
 
+  tags = {
+    Name = "node-app-subnet-group"
+  }
+}
 resource "aws_db_instance" "this" {
   allocated_storage       = var.allocated_storage
   engine                  = "postgres"
@@ -22,11 +24,3 @@ resource "aws_db_instance" "this" {
   tags = var.tags
 }
 
-resource "aws_db_subnet_group" "this" {
-  name       = "rds-subnet-group"
-  subnet_ids = var.subnet_ids
-
-  tags = {
-    Name = "RDS Subnet Group"
-  }
-}
