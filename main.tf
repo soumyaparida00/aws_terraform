@@ -77,7 +77,7 @@ module "rds" {
   engine_version          = "15.4"
   instance_class          = "db.t3.micro"
   db_name                 = "nodeapp"
-  username                = "admin"
+  username                = "test-admin"
   password                = "7Ew4X89d2Pg"
   parameter_group_name    = "default.postgres12"
   publicly_accessible     = false
